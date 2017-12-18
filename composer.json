@@ -1,0 +1,15 @@
+{
+  "name": "marius/lftc-lab5",
+  "authors": [
+    {
+      "name": "Marius Adam",
+      "email": "adamhoreamarius@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "CompilerDesign\\": "src/"
+    }
+  },
+  "require": {}
+}

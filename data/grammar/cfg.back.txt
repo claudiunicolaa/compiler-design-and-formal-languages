@@ -1,0 +1,143 @@
+program_def         -> prog_heading block
+prog_heading        -> "program" identifier ";"
+block               -> decl_part compound_stmt
+decl_part           -> const_def_part
+decl_part           -> var_dec_part
+const_def_part      -> "const" const_def const_def_part
+const_def_part      -> "const" const_def
+const_def           -> identifier "=" constant ";"
+var_dec_part        -> "declare" var_dec ";"
+var_dec_part        -> "declare" var_dec ";" var_dec_part
+var_dec             -> identifier_list "as" type
+compound_stmt       -> "{" stmt_seq "}"
+stmt_seq            -> stmt ";"
+stmt_seq            -> stmt ";" stmt_seq
+stmt                -> simple_stmt
+stmt                -> structured_stmt
+simple_stmt         -> assign_stmt
+simple_stmt         -> return_stmt
+simple_stmt         -> io_stmt
+assign_stmt         -> identifier "=" expression
+return_stmt         -> "return" expression
+io_stmt             -> "read" "(" identifier ")"
+io_stmt             -> "write" "(" identifier ")"
+structured_stmt     -> if_stmt
+structured_stmt     -> compound_stmt
+structured_stmt     -> while_stmt
+while_stmt          -> "while" "(" condition ")" stmt
+
+if_stmt             -> if_part if_optional_else
+if_part             -> "if" "(" condition ")" stmt
+if_optional_else    -> else stmt
+if_optional_else    -> __eps__
+condition           -> expression relational_operator expression
+expression          -> term
+expression          -> term operator term
+operator            -> "+"
+operator            -> "-"
+operator            -> "||"
+operator            -> "*"
+operator            -> "/"
+operator            -> "div"
+operator            -> "mod"
+operator            -> "&&"
+term                -> identifier
+term                -> number
+term                -> "(" expression ")"
+relational_operator -> "=="
+relational_operator -> "!="
+relational_operator -> "<"
+relational_operator -> "<="
+relational_operator -> ">"
+relational_operator -> ">="
+variable            -> identifier
+variable            -> indexed_variable
+indexed_variable    -> identifier index_part
+index_part          -> "[" variable "]"
+index_part          -> "[" variable "]" index_part
+type                -> array_type
+type                -> identifier
+array_type          -> type "[" numeric_constant "]"
+identifier          -> lou loud
+lou                 -> letter
+lou                 -> "_"
+loud                -> lou_digit
+loud                -> digit_loud
+loud                -> __eps__
+number              -> digit_seq
+number              -> sign digit_seq
+digit_seq           -> positive_digit
+digit_seq           -> positive_digit digit
+
+positive_digit      -> "1"
+positive_digit      -> "2"
+positive_digit      -> "3"
+positive_digit      -> "4"
+positive_digit      -> "5"
+positive_digit      -> "6"
+positive_digit      -> "7"
+positive_digit      -> "8"
+positive_digit      -> "9"
+
+digit               -> "0"
+digit               -> positive_digit
+string              -> """ str_content """
+
+str_content         -> letter
+str_content         -> " "
+str_content         -> digit
+str_content         -> str_content
+str_content         -> __eps__
+
+letter              -> "A"
+letter              -> "B"
+letter              -> "C"
+letter              -> "D"
+letter              -> "E"
+letter              -> "F"
+letter              -> "G"
+letter              -> "H"
+letter              -> "I"
+letter              -> "J"
+letter              -> "K"
+letter              -> "L"
+letter              -> "M"
+letter              -> "N"
+letter              -> "O"
+letter              -> "P"
+letter              -> "Q"
+letter              -> "R"
+letter              -> "S"
+letter              -> "T"
+letter              -> "U"
+letter              -> "V"
+letter              -> "W"
+letter              -> "X"
+letter              -> "Y"
+letter              -> "Z"
+letter              -> "a"
+letter              -> "b"
+letter              -> "c"
+letter              -> "d"
+letter              -> "e"
+letter              -> "f"
+letter              -> "g"
+letter              -> "h"
+letter              -> "i"
+letter              -> "j"
+letter              -> "k"
+letter              -> "l"
+letter              -> "m"
+letter              -> "n"
+letter              -> "o"
+letter              -> "p"
+letter              -> "q"
+letter              -> "r"
+letter              -> "s"
+letter              -> "t"
+letter              -> "u"
+letter              -> "v"
+letter              -> "w"
+letter              -> "x"
+letter              -> "y"
+letter              -> "z"

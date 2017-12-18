@@ -1,0 +1,142 @@
+PROGRAM_DEF         -> PROG_HEADING BLOCK
+PROG_HEADING        -> program IDENTIFIER ;
+BLOCK               -> DECL_PART COMPOUND_STMT
+DECL_PART           -> CONST_DEF_PART
+DECL_PART           -> VAR_DEC_PART
+CONST_DEF_PART      -> const CONST_DEF CONST_DEF_PART
+CONST_DEF_PART      -> const CONST_DEF
+CONST_DEF           -> IDENTIFIER = constant ;
+VAR_DEC_PART        -> declare VAR_DEC ;
+VAR_DEC_PART        -> declare VAR_DEC ; VAR_DEC_PART
+VAR_DEC             -> IDENTIFIER_LIST as TYPE
+IDENTIFIER_LIST     -> IDENTIFIER
+IDENTIFIER_LIST     -> IDENTIFIER IDENTIFIER_LIST
+COMPOUND_STMT       -> { STMT_SEQ }
+STMT_SEQ            -> STMT ;
+STMT_SEQ            -> STMT ; STMT_SEQ
+STMT                -> SIMPLE_STMT
+STMT                -> STRUCTURED_STMT
+SIMPLE_STMT         -> ASSIGN_STMT
+SIMPLE_STMT         -> RETURN_STMT
+SIMPLE_STMT         -> IO_STMT
+ASSIGN_STMT         -> IDENTIFIER = EXPRESSION
+RETURN_STMT         -> return EXPRESSION
+IO_STMT             -> read ( IDENTIFIER )
+IO_STMT             -> write ( IDENTIFIER )
+STRUCTURED_STMT     -> IF_STMT
+STRUCTURED_STMT     -> COMPOUND_STMT
+STRUCTURED_STMT     -> WHILE_STMT
+WHILE_STMT          -> while ( CONDITION ) STMT
+IF_STMT             -> IF_PART IF_OPTIONAL_ELSE
+IF_PART             -> if ( CONDITION ) STMT
+IF_OPTIONAL_ELSE    -> else STMT
+IF_OPTIONAL_ELSE    -> __eps__
+CONDITION           -> EXPRESSION RELATIONAL_OPERATOR EXPRESSION
+EXPRESSION          -> TERM
+EXPRESSION          -> TERM OPERATOR TERM
+OPERATOR            -> +
+OPERATOR            -> -
+OPERATOR            -> ||
+OPERATOR            -> *
+OPERATOR            -> /
+OPERATOR            -> div
+OPERATOR            -> mod
+OPERATOR            -> &&
+TERM                -> IDENTIFIER
+TERM                -> NUMBER
+TERM                -> ( EXPRESSION )
+RELATIONAL_OPERATOR -> ==
+RELATIONAL_OPERATOR -> !=
+RELATIONAL_OPERATOR -> <
+RELATIONAL_OPERATOR -> <=
+RELATIONAL_OPERATOR -> >
+RELATIONAL_OPERATOR -> >=
+VARIABLE            -> IDENTIFIER
+VARIABLE            -> INDEXED_VARIABLE
+INDEXED_VARIABLE    -> IDENTIFIER INDEX_PART
+INDEX_PART          -> [ VARIABLE ]
+INDEX_PART          -> [ VARIABLE ] INDEX_PART
+TYPE                -> ARRAY_TYPE
+TYPE                -> IDENTIFIER
+ARRAY_TYPE          -> TYPE [ NUMBER ]
+IDENTIFIER          -> LOU LOUD
+LOU                 -> LETTER
+LOU                 -> _
+LOUD                -> LOU
+LOUD                -> DIGIT
+LOUD                -> __eps__
+NUMBER              -> DIGIT_SEQ
+NUMBER              -> SIGN DIGIT_SEQ
+SIGN                -> +
+SIGN                -> -
+DIGIT_SEQ           -> POSITIVE_DIGIT
+DIGIT_SEQ           -> POSITIVE_DIGIT DIGIT
+POSITIVE_DIGIT      -> 1
+POSITIVE_DIGIT      -> 2
+POSITIVE_DIGIT      -> 3
+POSITIVE_DIGIT      -> 4
+POSITIVE_DIGIT      -> 5
+POSITIVE_DIGIT      -> 6
+POSITIVE_DIGIT      -> 7
+POSITIVE_DIGIT      -> 8
+POSITIVE_DIGIT      -> 9
+DIGIT               -> 0
+DIGIT               -> POSITIVE_DIGIT
+STRING              -> " STR_CONTENT "
+STR_CONTENT         -> LETTER
+STR_CONTENT         -> __space__
+STR_CONTENT         -> DIGIT
+STR_CONTENT         -> STR_CONTENT
+STR_CONTENT         -> __eps__
+LETTER              -> A
+LETTER              -> B
+LETTER              -> C
+LETTER              -> D
+LETTER              -> E
+LETTER              -> F
+LETTER              -> G
+LETTER              -> H
+LETTER              -> I
+LETTER              -> J
+LETTER              -> K
+LETTER              -> L
+LETTER              -> M
+LETTER              -> N
+LETTER              -> O
+LETTER              -> P
+LETTER              -> Q
+LETTER              -> R
+LETTER              -> S
+LETTER              -> T
+LETTER              -> U
+LETTER              -> V
+LETTER              -> W
+LETTER              -> X
+LETTER              -> Y
+LETTER              -> Z
+LETTER              -> a
+LETTER              -> b
+LETTER              -> c
+LETTER              -> d
+LETTER              -> e
+LETTER              -> f
+LETTER              -> g
+LETTER              -> h
+LETTER              -> i
+LETTER              -> j
+LETTER              -> k
+LETTER              -> l
+LETTER              -> m
+LETTER              -> n
+LETTER              -> o
+LETTER              -> p
+LETTER              -> q
+LETTER              -> r
+LETTER              -> s
+LETTER              -> t
+LETTER              -> u
+LETTER              -> v
+LETTER              -> w
+LETTER              -> x
+LETTER              -> y
+LETTER              -> z

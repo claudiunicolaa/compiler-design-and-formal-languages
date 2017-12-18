@@ -1,0 +1,200 @@
+PROGRAM_DEF         -> PROG_HEADING BLOCK
+
+PROG_HEADING        -> program IDENTIFIER ;
+
+BLOCK               -> DECL_PART COMPOUND_STMT
+
+DECL_PART           -> OPT_CONST_DEF_PART OPT_VAR_DEC_PART
+
+OPT_CONST_DEF_PART  -> CONST_DEF_PART
+                     | __eps__
+
+OPT_VAR_DEC_PART    -> VAR_DEC_PART
+                     | __eps__
+
+CONST_DEF_PART      -> const CONST_DEF CONST_DEF_PART
+                     | const CONST_DEF
+
+CONST_DEF           -> IDENTIFIER = CONSTANT ;
+
+VAR_DEC_PART        -> declare VAR_DEC ;
+                     | declare VAR_DEC ; VAR_DEC_PART
+
+VAR_DEC             -> IDENTIFIER_LIST as TYPE
+
+IDENTIFIER_LIST     -> IDENTIFIER
+                     | IDENTIFIER , IDENTIFIER_LIST
+
+COMPOUND_STMT       -> { STMT_SEQ }
+
+STMT_SEQ            -> STMT ;
+                     | STMT ; STMT_SEQ
+
+STMT                -> SIMPLE_STMT
+                     | STRUCTURED_STMT
+
+SIMPLE_STMT         -> ASSIGN_STMT
+                     | RETURN_STMT
+                     | IO_STMT
+
+ASSIGN_STMT         -> IDENTIFIER = EXPRESSION
+
+RETURN_STMT         -> return EXPRESSION
+
+IO_STMT             -> read ( IDENTIFIER )
+                     | write ( IDENTIFIER )
+
+STRUCTURED_STMT     -> IF_STMT
+                     | COMPOUND_STMT
+                     | WHILE_STMT
+
+WHILE_STMT          -> while ( CONDITION ) STMT
+
+IF_STMT             -> IF_PART IF_OPTIONAL_ELSE
+
+IF_PART             -> if ( CONDITION ) STMT
+
+IF_OPTIONAL_ELSE    -> else STMT
+                     | __eps__
+
+CONDITION           -> EXPRESSION RELATIONAL_OPERATOR EXPRESSION
+
+EXPRESSION          -> TERM
+                     | TERM OPERATOR TERM
+
+OPERATOR            -> +
+                     | -
+                     | ||
+                     | *
+                     | /
+                     | div
+                     | mod
+                     | &&
+
+TERM                -> IDENTIFIER
+                     | LITERAL_NUMBER
+                     | ( EXPRESSION )
+
+RELATIONAL_OPERATOR -> ==
+                     | !=
+                     | <
+                     | <=
+                     | >
+                     | >=
+
+VARIABLE            -> IDENTIFIER
+                     | INDEXED_VARIABLE
+
+INDEXED_VARIABLE    -> IDENTIFIER INDEX_PART
+
+INDEX_PART          -> [ VARIABLE ]
+                     | [ VARIABLE ] INDEX_PART
+                     | [ LITERAL_NUMBER ]
+                     | [ LITERAL_NUMBER ] INDEX_PART
+
+TYPE                -> ARRAY_TYPE
+                     | SCALAR_TYPE
+
+SCALAR_TYPE         -> int
+                     | char
+
+ARRAY_TYPE          -> SCALAR_TYPE [ LITERAL_NUMBER ]
+
+IDENTIFIER          -> LOU LOUD
+
+LOU                 -> LETTER
+                     | _
+
+LOUD                -> LOU
+                     | DIGIT
+                     | __eps__
+
+LITERAL_NUMBER      -> DIGIT_SEQ
+                     | SIGN DIGIT_SEQ
+
+SIGN                -> +
+                     | -
+
+DIGIT_SEQ           -> POSITIVE_DIGIT
+                     | POSITIVE_DIGIT DIGIT
+
+POSITIVE_DIGIT      -> 1
+                     | 2
+                     | 3
+                     | 4
+                     | 5
+                     | 6
+                     | 7
+                     | 8
+                     | 9
+
+DIGIT               -> 0
+                     | POSITIVE_DIGIT
+
+CONSTANT            -> LITERAL_STRING
+                     | LITERAL_NUMBER
+
+LITERAL_STRING      -> " STR_CONTENT "
+                     | EMPTY_STRING
+
+EMPTY_STRING        -> " "
+
+STR_CONTENT         -> STR_ITEM
+                     | STR_ITEM STR_CONTENT
+
+STR_ITEM            -> LETTER
+                     | DIGIT
+                     | __space__
+
+LETTER              -> A
+                     | B
+                     | C
+                     | D
+                     | E
+                     | F
+                     | G
+                     | H
+                     | I
+                     | J
+                     | K
+                     | L
+                     | M
+                     | N
+                     | O
+                     | P
+                     | Q
+                     | R
+                     | S
+                     | T
+                     | U
+                     | V
+                     | W
+                     | X
+                     | Y
+                     | Z
+                     | a
+                     | b
+                     | c
+                     | d
+                     | e
+                     | f
+                     | g
+                     | h
+                     | i
+                     | j
+                     | k
+                     | l
+                     | m
+                     | n
+                     | o
+                     | p
+                     | q
+                     | r
+                     | s
+                     | t
+                     | u
+                     | v
+                     | w
+                     | x
+                     | y
+                     | z

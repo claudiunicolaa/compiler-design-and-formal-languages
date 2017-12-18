@@ -1,0 +1,27 @@
+
+
+#a comment before
+
+program est_ne;
+
+#ignored comment
+
+
+
+
+const CONST_A = "valueofconsta";
+const MAX_B = 10;
+
+declare a,b,c as int;
+declare aa as int[10];
+
+{
+    b = 0;
+    while (b < MAX_B) {
+        b = b + 1;
+        b = (b - 1)+3;
+    }
+
+    a = (1 && 0);
+    if(a == 1) write("ok"); else {write("notok");}
+}
