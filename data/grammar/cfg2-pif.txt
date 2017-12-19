@@ -1,0 +1,98 @@
+PROGRAM_DEF         -> PROG_HEADING BLOCK
+
+PROG_HEADING        -> 79 0 73
+
+BLOCK               -> DECL_PART COMPOUND_STMT
+
+DECL_PART           -> OPT_CONST_DEF_PART OPT_VAR_DEC_PART
+
+OPT_CONST_DEF_PART  -> CONST_DEF_PART
+                     | __eps__
+
+OPT_VAR_DEC_PART    -> VAR_DEC_PART
+                     | __eps__
+
+CONST_DEF_PART      -> 82 CONST_DEF CONST_DEF_PART
+                     | 82 CONST_DEF
+
+CONST_DEF           -> 0 70 0 73
+
+VAR_DEC_PART        -> 85 VAR_DEC 73
+                     | 85 VAR_DEC 73 VAR_DEC_PART
+
+VAR_DEC             -> IDENTIFIER_LIST 88 TYPE
+
+IDENTIFIER_LIST     -> 0
+                     | 0 76 IDENTIFIER_LIST
+
+COMPOUND_STMT       -> 31 STMT_SEQ 34
+
+STMT_SEQ            -> STMT 73
+                     | STMT 73 STMT_SEQ
+
+STMT                -> SIMPLE_STMT
+                     | STRUCTURED_STMT
+
+SIMPLE_STMT         -> ASSIGN_STMT
+                     | RETURN_STMT
+                     | IO_STMT
+
+ASSIGN_STMT         -> 0 70 EXPRESSION
+
+RETURN_STMT         -> 91 EXPRESSION
+
+IO_STMT             -> 94 25 0 28
+                     | 97 25 0 28
+
+STRUCTURED_STMT     -> IF_STMT
+                     | COMPOUND_STMT
+                     | WHILE_STMT
+
+WHILE_STMT          -> 100 25 CONDITION 28 STMT
+
+IF_STMT             -> IF_PART IF_OPTIONAL_ELSE
+
+IF_PART             -> 103 25 CONDITION 28 STMT
+
+IF_OPTIONAL_ELSE    -> 106 STMT
+                     | __eps__
+
+CONDITION           -> EXPRESSION RELATIONAL_OPERATOR EXPRESSION
+
+EXPRESSION          -> TERM
+                     | TERM OPERATOR TERM
+
+OPERATOR            -> 46
+                     | 49
+                     | 22
+                     | 43
+                     | 52
+                     | 55
+                     | 19
+
+TERM                -> 0
+                     | 1
+                     | 25 EXPRESSION 28
+
+RELATIONAL_OPERATOR -> 10
+                     | 16
+                     | 64
+                     | 67
+                     | 61
+                     | 58
+
+VARIABLE            -> 0
+                     | 0 INDEX_PART
+
+INDEX_PART          -> 37 VARIABLE 40
+                     | 37 VARIABLE 40 INDEX_PART
+                     | 37 EXPRESSION 40
+                     | 37 EXPRESSION 40 INDEX_PART
+
+TYPE                -> ARRAY_TYPE
+                     | SCALAR_TYPE
+
+SCALAR_TYPE         -> 112
+                     | 109
+
+ARRAY_TYPE          -> SCALAR_TYPE 37 1 40

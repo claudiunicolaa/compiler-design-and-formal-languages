@@ -67,8 +67,7 @@ OPERATOR            -> +
                      | ||
                      | *
                      | /
-                     | div
-                     | mod
+                     | %
                      | &&
 
 TERM                -> IDENTIFIER
@@ -99,102 +98,3 @@ SCALAR_TYPE         -> int
                      | char
 
 ARRAY_TYPE          -> SCALAR_TYPE [ LITERAL_NUMBER ]
-
-IDENTIFIER          -> LOU LOUD
-
-LOU                 -> LETTER
-                     | _
-
-LOUD                -> LOU
-                     | DIGIT
-                     | __eps__
-
-LITERAL_NUMBER      -> DIGIT_SEQ
-                     | SIGN DIGIT_SEQ
-
-SIGN                -> +
-                     | -
-
-DIGIT_SEQ           -> POSITIVE_DIGIT
-                     | POSITIVE_DIGIT DIGIT
-
-POSITIVE_DIGIT      -> 1
-                     | 2
-                     | 3
-                     | 4
-                     | 5
-                     | 6
-                     | 7
-                     | 8
-                     | 9
-
-DIGIT               -> 0
-                     | POSITIVE_DIGIT
-
-CONSTANT            -> LITERAL_STRING
-                     | LITERAL_NUMBER
-
-LITERAL_STRING      -> " STR_CONTENT "
-                     | EMPTY_STRING
-
-EMPTY_STRING        -> " "
-
-STR_CONTENT         -> STR_ITEM
-                     | STR_ITEM STR_CONTENT
-
-STR_ITEM            -> LETTER
-                     | DIGIT
-                     | __space__
-
-LETTER              -> A
-                     | B
-                     | C
-                     | D
-                     | E
-                     | F
-                     | G
-                     | H
-                     | I
-                     | J
-                     | K
-                     | L
-                     | M
-                     | N
-                     | O
-                     | P
-                     | Q
-                     | R
-                     | S
-                     | T
-                     | U
-                     | V
-                     | W
-                     | X
-                     | Y
-                     | Z
-                     | a
-                     | b
-                     | c
-                     | d
-                     | e
-                     | f
-                     | g
-                     | h
-                     | i
-                     | j
-                     | k
-                     | l
-                     | m
-                     | n
-                     | o
-                     | p
-                     | q
-                     | r
-                     | s
-                     | t
-                     | u
-                     | v
-                     | w
-                     | x
-                     | y
-                     | z

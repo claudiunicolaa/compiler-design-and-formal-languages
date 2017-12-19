@@ -10,7 +10,7 @@ program est_ne;
 
 
 const CONST_A = "valueofconsta";
-const MAX_B = 10;
+const MAX_B = - 10;
 
 declare a,b,c as int;
 declare aa as int[10];
@@ -22,6 +22,39 @@ declare aa as int[10];
         b = (b - 1)+3;
     }
 
+    a=a-1;
+    a =
+        a + 1
+        + b + 2;
+
+    write(aa[10][1][as[aa[0]]]);
     a = (1 && 0);
-    if(a == 1) write("ok"); else {write("notok");}
+    if(a== 1) write("ok"); else {write("notok");}
+
+    if (1 < 2) {
+        if (3 > 4 {
+            if (2 == 2) {
+                if (a >= 1) {
+                    if (b <= 10) {
+                        if (a != b) {
+                            while (b != a) {
+                                write("this is very nested");
+                                a = a + b - a + (1 + a * (b / ((1 + a % 3) * 2)));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    read(a);
+    write("
+        This
+        is
+        a
+        multi
+        line
+        string
+    ");
+    write("");
 }

@@ -40,11 +40,11 @@ int
 TOKENS;
 
 $tokens = explode(PHP_EOL, $tokens);
-$cnt    = 2;
+$cnt    = 10;
 foreach ($tokens as $token) {
     $up = strtoupper($token);
     echo "const T_$up = $cnt;".PHP_EOL;
-    $cnt++;
+    $cnt += 3;
 }
 
 echo '===================='.PHP_EOL;

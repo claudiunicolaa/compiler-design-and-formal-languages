@@ -8,9 +8,10 @@ require __DIR__.'/vendor/autoload.php';
 
 $file = __DIR__.'/data/input/input4-new.txt';
 
-$scanner = new Scanner(file_get_contents($file));
+$scanner = new Scanner();
 
-$scanner->scan();
+$input = file_get_contents($file);
+$scanner->scan($input);
 
 $output = 'Constants Table'.PHP_EOL;
 foreach ($scanner->getConstants()->toArray() as $const => $code) {
@@ -27,4 +28,6 @@ foreach ($scanner->getInternalForm() as $item) {
 $output .= PHP_EOL;
 
 file_put_contents($file.'.out', $output);
-file_put_contents($file.'.tokens', implode(PHP_EOL, $scanner->getTokens()));
+file_put_contents(
+    $file.'.tokens', implode(PHP_EOL, $scanner->getTokens($input))
+);

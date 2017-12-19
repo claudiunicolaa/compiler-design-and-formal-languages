@@ -2,133 +2,114 @@
 
 namespace CompilerDesign\Parser;
 
+use Exception;
 use Generator;
 
 class Lexer
 {
-    const NL_UNIX               = "\n";
-    const NL_WIN                = "\r\n";
     const IDENTIFIER_MAX_LENGTH = 8;
-    const LITERAL_QUOTE         = '"';
-    const LITERAL_SPACE         = ' ';
-    const LITERAL_TAB           = "\t";
-    const LITERAL_UNDERSCORE    = '_';
-    const LITERAL_DIEZ          = '#';
-    const LITERAL_SEMICOLON     = ';';
-    const LITERAL_MINUS         = '-';
-    const LITERAL_PLUS          = '+';
 
-    /**
-     * @var string
-     */
+    const NL_UNIX = "\n";
+    const NL_WIN  = "\r\n";
+
+    const LITERAL_QUOTE      = '"';
+    const LITERAL_SPACE      = ' ';
+    const LITERAL_TAB        = "\t";
+    const LITERAL_ESCAPE     = "\\";
+    const LITERAL_UNDERSCORE = '_';
+    const LITERAL_DIEZ       = '#';
+    const LITERAL_SEMICOLON  = ';';
+
     private $input;
-    /**
-     * @var int
-     */
     private $line;
-
-    /**
-     * @var int
-     */
     private $col;
-
-    /**
-     * @var int
-     */
-    private $position;
-
-    /**
-     * @var
-     */
+    private $offset;
     private $end;
+    private $keywords;
+    private $symbols;
+    private $maxSymbolLength;
+    private $errors;
 
-    private $typeMap;
-
-    private $maxReadBeforeIdentifiers;
+    public function __construct(array $symbols, array $keywords)
+    {
+        $this->symbols         = $symbols;
+        $this->keywords        = $keywords;
+        $this->maxSymbolLength = max(array_map('strlen', $symbols));
+    }
 
     /**
-     * Lexer constructor.
-     *
      * @param string $input
-     * @param array  $typeMap
-     */
-    public function __construct($input, array $typeMap)
-    {
-        $this->typeMap                  = $typeMap;
-        $this->maxReadBeforeIdentifiers = max(
-            array_map(
-                'strlen', array_keys($typeMap)
-            )
-        );
-        $this->setInput($input);
-    }
-
-    public function setInput(string $input)
-    {
-        $this->input = $input;
-        $this->end   = strlen($input);
-    }
-
-    /**
+     *
      * @return Generator|Token[]
      */
-    public function getTokens()
+    public function getTokens(string $input): Generator
     {
+        $this->setInput($input);
+
         $this->reset();
-        $this->seekToken();
+        $this->seekNext();
 
-        while ($this->position < $this->end) {
-            list($line, $col) = [$this->line, $this->col];
-            $token = $this
-                ->parseNext()
-                ->setLine($line)
-                ->setCol($col);
+        while ($this->hasInput()) {
+            $tokenPosition = $this->currentPosition();
+            $token         = $this->parseNext()->setPosition($tokenPosition);
 
-            echo $token.PHP_EOL;
-            $this->seekToken();
+            $this->seekNext();
             yield $token;
         }
     }
 
-    private function reset()
+    private function setInput(string $input)
     {
-        $this->line     = 1;
-        $this->col      = 1;
-        $this->position = 0;
+        $this->input  = $input;
+        $this->end    = strlen($input);
+        $this->errors = [];
     }
 
-    private function seekToken()
+    private function reset()
+    {
+        $this->line   = 1;
+        $this->col    = 1;
+        $this->offset = 0;
+    }
+
+    /**
+     * Move the internal offset up to the next possible token
+     * by skipping comments and whitespaces
+     */
+    private function seekNext()
     {
         if (!$this->hasInput()) {
             return;
         }
+
         $current = $this->current();
         if ($current === self::LITERAL_DIEZ) {
-            $this->skipComments();
-            $this->seekToken();
+            $this->skipCurrentLine();
+            $this->seekNext();
         }
+
         if ($this->isWhitespace($current)) {
-            $this->skipWhiteSpace();
-            $this->seekToken();
+            $this->skipWhiteSpaces();
+            $this->seekNext();
         }
     }
 
-    private function hasInput()
+    private function hasInput(): bool
     {
-        return $this->position < $this->end - 1;
+        return $this->offset < $this->end;
     }
 
-    private function current()
+    private function current(): string
     {
-        return $this->input[$this->position];
+        return $this->input[$this->offset];
     }
 
-    private function skipComments()
+    /**
+     * Moves the internal offset to the beginning of the next line
+     */
+    private function skipCurrentLine()
     {
-        while ($this->hasInput()
-            && $this->current() !== self::NL_UNIX
-            && $this->current() !== self::NL_WIN
-        ) {
+        while ($this->hasInput() && !$this->isNewLine($this->current())) {
             $this->advance();
         }
 
@@ -137,72 +118,91 @@ class Lexer
         }
     }
 
-    private function advance()
+    private function isNewLine(string $char): bool
     {
-        $prev = $this->input[$this->position];
-        $this->position++;
-        $this->col++;
-        if ($prev === self::NL_UNIX || $prev === self::NL_WIN) {
-            $this->line++;
-            $this->col = 1;
-        }
+        return $char === self::NL_WIN || $char === self::NL_UNIX;
     }
 
-    private function isWhitespace($char)
+    /**
+     * Move the internal offset with the given position
+     * and update other internals accordingly
+     *
+     * @param int $howMuch
+     */
+    private function advance(int $howMuch = 1)
     {
-        return $char === self::NL_UNIX
-            || $char === self::NL_WIN
+        if ($howMuch <= 0 || !isset($this->input[$this->offset])) {
+            return;
+        }
+
+        $prev = $this->input[$this->offset];
+        ++$this->offset;
+        ++$this->col;
+        if ($this->isNewLine($prev)) {
+            ++$this->line;
+            $this->col = 1;
+        }
+        $this->advance($howMuch - 1);
+    }
+
+    private function isWhitespace(string $char): bool
+    {
+        return $this->isNewLine($char)
             || $char === self::LITERAL_TAB
             || $char === self::LITERAL_SPACE;
     }
 
-    private function skipWhiteSpace()
+    private function skipWhiteSpaces()
     {
         while ($this->hasInput() && $this->isWhitespace($this->current())) {
             $this->advance();
         }
     }
 
+    private function currentPosition(): Position
+    {
+        return new Position($this->line, $this->col);
+    }
+
     /**
      * @return Token
      * @throws Exception
      */
-    private function parseNext()
+    private function parseNext(): Token
     {
         $currentChar = $this->current();
         if ($currentChar == self::LITERAL_QUOTE) {
-            return new Token(Token::T_CONSTANT, $this->parseStringConstant());
+            return $this->parseStringConstant();
         }
-        if ($this->isDigit($currentChar)
-            || ($this->isSign($currentChar)
-                && $this->isDigit($this->peekNext())
-            )
-        ) {
-            return new Token(Token::T_CONSTANT, $this->parseNumberConstant());
+        if ($this->isDigit($currentChar)) {
+            return $this->parseNumberConstant();
         }
 
-        if (null !== $this->peekNext()) {
-            // try to match two chars symbols before 1 char symbols
-            $twoCharsSymbol = $currentChar.$this->peekNext();
-            if (isset($this->typeMap[$twoCharsSymbol])) {
-                $this->advance();
-                $this->advance();
-                $type = $this->typeMap[$twoCharsSymbol];
+        for ($i = $this->maxSymbolLength; $i > 0; $i--) {
+            $symbolPeek = $currentChar.$this->peekNext($i);
+            if (isset($this->symbols[$symbolPeek])) {
+                $this->advance($i + 1);
 
-                return new Token($type, $twoCharsSymbol);
+                return new Token($this->symbols[$symbolPeek], $symbolPeek);
             }
         }
 
-        if (isset($this->typeMap[$currentChar])) {
-            $type = $this->typeMap[$currentChar];
+        // also try to match one char symbols
+        if (isset($this->symbols[$currentChar])) {
+            // move the pointer to the next character
             $this->advance();
 
-            return new Token($type, $currentChar);
+            return new Token($this->symbols[$currentChar], $currentChar);
         }
 
-        $nextValue = $this->parseNextValue();
-        if (isset($this->typeMap[$nextValue])) {
-            return new Token($this->typeMap[$nextValue], $nextValue);
+        $startPosition = $this->currentPosition();
+        $nextValue     = $this->parseIdentifier();
+
+        // an identifier might also be a keyword
+        // so do a check before assuming the token is an identifier
+        $lowerNextValue = strtolower($nextValue);
+        if (isset($this->keywords[$lowerNextValue])) {
+            return new Token($this->keywords[$lowerNextValue], $nextValue);
         }
 
         // check if identifier
@@ -210,141 +210,212 @@ class Lexer
             return new Token(Token::T_IDENTIFIER, $nextValue);
         }
 
-        throw new Exception(
-            sprintf(
-                'Unrecognized token \'%s\' at %s', $nextValue,
-                $this->formatPosition()
-            )
-        );
+        $nextValue .= $this->seekWhiteSpaceOrSymbol();
+        $this->error($startPosition, "Unrecognized symbol '$nextValue'.");
+
+        return new Token(Token::T_INVALID, $nextValue);
     }
 
     /**
-     * @return string
+     * @return Token
      * @throws Exception
      */
-    private function parseStringConstant()
+    private function parseStringConstant(): Token
     {
-        $stringConst = $this->input[$this->position];
-        $this->advance();
-        while ($this->hasInput() && $this->current() != self::LITERAL_QUOTE
-            && $this->isLetter($this->current())) {
-            $stringConst .= $this->current();
-            $this->advance();
+        $start       = $this->currentPosition();
+        $stringConst = $this->currentAndAdvance();
+
+        // read until find the closing quote
+        while ($this->hasInput()
+            && $this->current() != self::LITERAL_QUOTE
+            && $this->isValidStringChar($this->current())) {
+            $stringConst .= $this->currentAndAdvance();
         }
 
-        $stringConst .= $this->current();
+        if ($this->current() !== self::LITERAL_QUOTE) {
+            $this->error($start, "Missing closing quote opened.");
+
+            return new Token(Token::T_INVALID, $stringConst);
+        }
+
+        $stringConst .= $this->currentAndAdvance();
+
+        return new Token(Token::T_CONSTANT, $stringConst);
+    }
+
+    /**
+     * Retrieve the char at the current position and move
+     * the internal offset to the next position
+     *
+     * @return string
+     */
+    private function currentAndAdvance(): string
+    {
+        $current = $this->current();
         $this->advance();
 
-        return $stringConst;
+        return $current;
     }
 
-    private function isLetter($char)
+    private function isValidStringChar(string $char): bool
     {
-        return $this->checkCharRange($char, 'a', 'z')
-            || $this->checkCharRange($char, 'A', 'Z');
+        return $this->isLetter($char)
+            || $this->isDigit($char)
+            || $this->isWhitespace($char);
     }
 
-    private function checkCharRange($char, $min, $max)
+    private function isLetter($char): bool
+    {
+        return $this->isCharRange($char, 'a', 'z')
+            || $this->isCharRange($char, 'A', 'Z');
+    }
+
+    private function isCharRange(string $char, string $min, string $max): bool
     {
         return strlen($char) === 1
             && $char >= $min
             && $char <= $max;
     }
 
-    private function isDigit($char)
+    private function isDigit($char): bool
     {
-        return $this->checkCharRange($char, '0', '9');
+        return $this->isCharRange($char, '0', '9');
     }
 
-    private function isSign($char)
+    private function error(Position $position, string $message)
     {
-        return strlen($char) === 1
-            && ($char === self::LITERAL_MINUS || $char === self::LITERAL_PLUS);
+        $this->errors[] = "$position: $message";
     }
 
-    private function peekNext()
+    private function parseNumberConstant(): Token
     {
-        return $this->hasInput() ? $this->input[$this->position + 1] : null;
-    }
-
-    private function parseNumberConstant()
-    {
-        $number = '';
-        if ($this->isSign($this->current())) {
-            $number .= $this->current();
-            $this->advance();
-        }
-
+        // validate that is is a multiple digits number
+        // the first digit is not zero
         if ($this->isDigit($this->peekNext())
-            && !$this->isNonZeroDigit(
-                $this->current()
-            )
+            && !$this->isNonZeroDigit($this->current())
         ) {
-            throw new Exception(
-                sprintf(
-                    'Invalid numeric constant at %s', $this->formatPosition()
-                )
-            );
-        }
-        while ($this->isDigit($this->current())) {
-            $number .= $this->current();
-            $this->advance();
+            $this->error($this->currentPosition(), "Invalid numeric constant");
+
+            return new Token(Token::T_INVALID, $this->currentAndAdvance());
         }
 
-        return $number;
+        $number = '';
+        while ($this->hasInput() && $this->isDigit($this->current())) {
+            $number .= $this->currentAndAdvance();
+        }
+
+        return new Token(Token::T_CONSTANT, $number);
     }
 
-    private function isNonZeroDigit($char)
+    /**
+     * Take a look at the next char sequence without
+     * changing the internal pointer
+     *
+     * @param int $peekCount
+     *
+     * @return string
+     */
+    private function peekNext(int $peekCount = 1): string
     {
-        return $this->checkCharRange($char, '1', '9');
+        $peek            = '';
+        $peekCurrentSize = 0;
+        while (isset($this->input[$this->offset + $peekCurrentSize + 1])
+            && $peekCurrentSize < $peekCount) {
+            $peek .= $this->input[$this->offset + $peekCurrentSize + 1];
+            ++$peekCurrentSize;
+        }
+
+        return $peek;
     }
 
-    private function formatPosition()
+    private function isNonZeroDigit(string $char): bool
     {
-        return sprintf(
-            'line: %s, col: %s',
-            $this->line,
-            $this->col
-        );
+        return $this->isCharRange($char, '1', '9');
     }
 
-    private function parseNextValue()
+    /**
+     * Try to parse an identifier, i.e. a sequence of characters accepted
+     * for identifiers
+     *
+     * @return string
+     */
+    private function parseIdentifier(): string
     {
         $value = '';
         while ($this->hasInput()
-            && ($this->isLetter($this->current())
+            && (
+                $this->isLetter($this->current())
                 || $this->isDigit($this->current())
-                || $this->current() === self::LITERAL_UNDERSCORE
+                || $this->current() == self::LITERAL_UNDERSCORE
             )) {
-            $value .= $this->current();
-            $this->advance();
+            $value .= $this->currentAndAdvance();
         }
 
         return $value;
     }
 
-    private function isIdentifier(string $value)
+    /**
+     * Self explanatory
+     *
+     * @param string $val
+     *
+     * @return bool
+     */
+    private function isIdentifier(string $val): bool
     {
-        $len = strlen($value);
+        $len = strlen($val);
         if ($len < 1 || $len > self::IDENTIFIER_MAX_LENGTH) {
             return false;
         }
 
-        if (!($this->isLetter($value[0])
-            || $value[0] === self::LITERAL_UNDERSCORE)
-        ) {
+        if (!$this->isLetterOrUnderscore($val[0])) {
             return false;
         }
-        for ($i = 1; $i < $len; $i++) {
-            $c     = $value[$i];
-            $valid = $this->isLetter($c);
-            $valid = $valid || $this->isDigit($c);
-            $valid = $valid || $c === self::LITERAL_UNDERSCORE;
-            if (!$valid) {
+
+        for ($i = 1; $i < $len; ++$i) {
+            $c = $val[$i];
+            if (!($this->isLetterOrUnderscore($c) || $this->isDigit($c))) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private function isLetterOrUnderscore(string $char): bool
+    {
+        return $this->isLetter($char) || $char === self::LITERAL_UNDERSCORE;
+    }
+
+    /**
+     * Move the internal offset to the next whitespace or symbol
+     * and return the skipped characters
+     *
+     * @return string
+     */
+    private function seekWhiteSpaceOrSymbol(): string
+    {
+        $skipped = '';
+        while ($this->hasInput()) {
+
+            if ($this->isWhitespace($this->current())) {
+                break;
+            }
+            if (isset($this->symbols[$this->current()])) {
+                break;
+            }
+
+            $skipped .= $this->currentAndAdvance();
+        }
+
+        return $skipped;
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
     }
 }

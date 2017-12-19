@@ -47,6 +47,7 @@ class ContextFreeGrammar
 
     public function extractTerminals()
     {
+        $this->terminals = [];
         foreach ($this->rules as $symbol => $symbolRules) {
             foreach ($symbolRules as $rule) {
                 foreach ($rule as $item) {
@@ -129,5 +130,26 @@ G = (
 $rulesStr
 )
 GRAMMAR;
+    }
+
+    public function forEachTerminal(callable $mapper)
+    {
+        foreach ($this->rules as $symbol => $rules) {
+            foreach ($rules as $ruleId => $rule) {
+                foreach ($rule as $itemId => $item) {
+                    if (!$this->isNonTerminal($item)
+                        && !$this->isEpsilon(
+                            $item
+                        )
+                    ) {
+                        $this->rules[$symbol][$ruleId][$itemId] = $mapper(
+                            $this->rules[$symbol][$ruleId][$itemId]
+                        );
+                    }
+                }
+            }
+        }
+
+        $this->extractTerminals();
     }
 }

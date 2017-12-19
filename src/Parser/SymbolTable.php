@@ -2,16 +2,16 @@
 
 namespace CompilerDesign\Parser;
 
-class Container
+class SymbolTable
 {
-    private $code;
+    private $codeCounter;
     private $map;
     private $reversedMap;
 
     public function __construct()
     {
-        $this->code = -1;
-        $this->map  = array();
+        $this->codeCounter = -1;
+        $this->map         = array();
     }
 
     public function put($value)
@@ -20,14 +20,14 @@ class Container
             return $this->map[$value];
         }
 
-        $this->code++;
-        $this->map[$value]              = $this->code;
-        $this->reversedMap[$this->code] = $value;
+        $this->codeCounter++;
+        $this->map[$value]                     = $this->codeCounter;
+        $this->reversedMap[$this->codeCounter] = $value;
 
-        return $this->code;
+        return $this->codeCounter;
     }
 
-    public function getCode($value)
+    public function getCodeCounter($value)
     {
         return $this->map[$value];
     }
