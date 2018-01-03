@@ -12,7 +12,7 @@ class StateCollection implements \IteratorAggregate
 
     public function add(State $state)
     {
-        $this->states[Utils::arrayToString($state->getAnalysisElements())] = $state;
+        $this->states[Utils::arrayToStringSorted($state->getAnalysisElements())] = $state;
     }
 
     /**
@@ -22,7 +22,7 @@ class StateCollection implements \IteratorAggregate
      */
     public function findStateWithElements(array $elements)
     {
-        $key = Utils::arrayToString($elements);
+        $key = Utils::arrayToStringSorted($elements);
 
         return isset($this->states[$key]) ? $this->states[$key] : null;
     }

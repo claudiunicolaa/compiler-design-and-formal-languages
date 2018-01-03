@@ -25,13 +25,27 @@ class State
 
     public function findElementWithDotBeforeSymbol(string $symbol)
     {
+        /** @var AnalysisElement[] $elements */
+        $elements = [];
         foreach ($this->analysisElements as $analysisElement) {
-            if ($analysisElement->getSymbolAfterDot() === $symbol) {
-                return $analysisElement;
+            if ($analysisElement->getSymbolAfterDot() == $symbol) {
+                $elements[] = $analysisElement;
             }
         }
 
-        return null;
+        $elementsCount = count($elements);
+        if ($elementsCount < 1) {
+            return null;
+        }
+        if ($elementsCount == 1) {
+            return reset($elements);
+        }
+
+
+        $elementsStr = implode(PHP_EOL, $elements);
+        throw new \RuntimeException(
+            "Multiple elements found for symbol $symbol : \n$elementsStr,\n state $this"
+        );
     }
 
     public function __toString()
@@ -39,7 +53,7 @@ class State
         return sprintf(
             '%s : %s',
             $this->getId(),
-            Utils::arrayToString($this->getAnalysisElements())
+            Utils::arrayToStringSorted($this->getAnalysisElements())
         );
     }
 

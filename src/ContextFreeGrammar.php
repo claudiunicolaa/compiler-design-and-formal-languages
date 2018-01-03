@@ -197,7 +197,7 @@ GRAMMAR;
             $this->startSymbol = $symbol;
         }
 
-        $rule = new Rule($this->productionsCount++, $symbol, $rhs);
+        $rule = new Rule($this->productionsCount++, $symbol, $rhs, $this->epsilonSymbol);
         $this->addNonTerminal($symbol);
         $this->rulesBySymbol[$symbol][]     = $rule;
         $this->ruleByOffset[$rule->getId()] = $rule;

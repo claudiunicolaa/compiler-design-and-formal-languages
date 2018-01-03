@@ -41,9 +41,10 @@ $loader = new \CompilerDesign\CfgLoader();
 
 $grammar = $loader->loadFromString(
     <<<GR
-S -> a A
+S -> A
+A -> a A
 A -> b A
-A -> c
+A -> __eps__
 GR
 );
 
@@ -73,11 +74,14 @@ $analysisTable = $analyzer->createAnalysisTable($grammar);
 $productions = $analyzer->analyze(
     [
         'a',
+        'a',
         'b',
+        'a',
         'b',
-        'c',
     ],
     $grammar
 );
 
-print_r($productions);
+foreach ($productions as $productionId) {
+    echo $grammar->getRuleById($productionId).PHP_EOL;
+}

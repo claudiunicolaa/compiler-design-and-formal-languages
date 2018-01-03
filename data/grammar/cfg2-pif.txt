@@ -1,6 +1,4 @@
-PROGRAM_DEF         -> PROG_HEADING BLOCK
-
-PROG_HEADING        -> 79 0 73
+PROGRAM_DEF         -> 79 0 73 BLOCK
 
 BLOCK               -> DECL_PART COMPOUND_STMT
 

@@ -3,6 +3,7 @@
 
 namespace CompilerDesign\Analyzer;
 
+use CompilerDesign\ContextFreeGrammar;
 use CompilerDesign\Rule;
 
 /**
@@ -29,7 +30,7 @@ class AnalysisElement
     {
         return new self(
             $rule->getNonTerminal(),
-            array_merge([Dot::get()], $rule->getRhs()),
+            array_merge([Dot::get()], $rule->getRhsWithoutEpsilon()),
             $rule
         );
     }

@@ -27,11 +27,6 @@ class ReduceAction implements Action
         $this->analysisElement = $analysisElement;
     }
 
-    public function apply(AnalysisContext $analysisState)
-    {
-        // TODO: Implement apply() method.
-    }
-
     /**
      * @return AnalysisElement
      */

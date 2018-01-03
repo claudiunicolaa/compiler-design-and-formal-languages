@@ -11,12 +11,14 @@ class Rule
     private $id;
     private $nonTerminal;
     private $rhs;
+    private $epsilonSymbol;
 
-    public function __construct(int $id, string $nonTerminal, array $rhs)
+    public function __construct(int $id, string $nonTerminal, array $rhs, string $epsilonSymbol)
     {
-        $this->id          = $id;
-        $this->nonTerminal = $nonTerminal;
-        $this->rhs         = $rhs;
+        $this->id            = $id;
+        $this->nonTerminal   = $nonTerminal;
+        $this->rhs           = $rhs;
+        $this->epsilonSymbol = $epsilonSymbol;
     }
 
     public function __toString()
@@ -56,5 +58,14 @@ class Rule
     public function mapRhs(callable $mapper)
     {
         $this->rhs = array_map($mapper, $this->rhs);
+    }
+
+    public function getRhsWithoutEpsilon()
+    {
+        $filterEpsilon = function ($item) {
+            return $item !== $this->epsilonSymbol;
+        };
+
+        return array_filter($this->getRhs(), $filterEpsilon);
     }
 }

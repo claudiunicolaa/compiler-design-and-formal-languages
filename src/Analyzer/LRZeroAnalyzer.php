@@ -82,7 +82,7 @@ class LRZeroAnalyzer
     private function closure(AnalysisElement $element, ContextFreeGrammar $grammar)
     {
         /** @var AnalysisElement[] $closure */
-        $closure  = [(string)$element => $element];
+        $closure  = [$element->hash() => $element];
         $modified = true;
         while ($modified) {
             $modified = false;

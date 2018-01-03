@@ -8,6 +8,7 @@ use CompilerDesign\Analyzer\Action\ActionCollection;
 use CompilerDesign\Analyzer\Action\ReduceAction;
 use CompilerDesign\Analyzer\Action\ShiftAction;
 use CompilerDesign\ContextFreeGrammar;
+use CompilerDesign\Parser\Token;
 
 /**
  * @author Marius Adam <marius.adam134@gmail.com>
@@ -90,7 +91,8 @@ class AnalysisTable
             return $this->gotoTable[$state->getId()][$symbol];
         }
 
-        throw new \RuntimeException("Undefined goto for state $state and symbol $symbol");
+        $token = Token::getTypeName($symbol);
+        throw new \RuntimeException("Undefined goto for state $state and symbol $symbol ($token)");
     }
 
     /**

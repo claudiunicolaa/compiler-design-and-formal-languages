@@ -8,8 +8,11 @@ namespace CompilerDesign\Analyzer;
  */
 class Utils
 {
-    public static function arrayToString(array $elements)
+    public static function arrayToStringSorted(array $elements)
     {
+        $elements = array_map('strval', $elements);
+        sort($elements);
+
         $elementsString = implode(', ', $elements);
 
         return '{'.$elementsString.'}';

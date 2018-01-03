@@ -17,7 +17,7 @@ $scanner->scan($input);
 
 $cfgLoader = new CfgLoader();
 $grammar   = $cfgLoader->loadFromString(
-    file_get_contents('data/grammar/cfg2.txt')
+    file_get_contents(__DIR__.'/data/grammar/cfg2.txt')
 );
 
 $scanner->replaceTerminals($grammar);

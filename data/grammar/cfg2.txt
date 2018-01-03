@@ -2,25 +2,13 @@ PROGRAM_DEF         -> PROG_HEADING BLOCK
 
 PROG_HEADING        -> program __IDENTIFIER__ ;
 
-BLOCK               -> DECL_PART COMPOUND_STMT
+BLOCK               -> DECL_LIST COMPOUND_STMT
 
-DECL_PART           -> OPT_CONST_DEF_PART OPT_VAR_DEC_PART
+DECL_LIST           -> DECL ; DECL_LIST
+                     | DECL ;
 
-OPT_CONST_DEF_PART  -> CONST_DEF_PART
-                     | __eps__
-
-OPT_VAR_DEC_PART    -> VAR_DEC_PART
-                     | __eps__
-
-CONST_DEF_PART      -> const CONST_DEF CONST_DEF_PART
-                     | const CONST_DEF
-
-CONST_DEF           -> __IDENTIFIER__ = __CONSTANT__ ;
-
-VAR_DEC_PART        -> declare VAR_DEC ;
-                     | declare VAR_DEC ; VAR_DEC_PART
-
-VAR_DEC             -> IDENTIFIER_LIST as TYPE
+DECL                -> const __IDENTIFIER__ = __CONSTANT__
+                     | declare IDENTIFIER_LIST as TYPE
 
 IDENTIFIER_LIST     -> __IDENTIFIER__
                      | __IDENTIFIER__ , IDENTIFIER_LIST
@@ -50,12 +38,7 @@ STRUCTURED_STMT     -> IF_STMT
 
 WHILE_STMT          -> while ( CONDITION ) STMT
 
-IF_STMT             -> IF_PART IF_OPTIONAL_ELSE
-
-IF_PART             -> if ( CONDITION ) STMT
-
-IF_OPTIONAL_ELSE    -> else STMT
-                     | __eps__
+IF_STMT             -> if ( CONDITION ) STMT
 
 CONDITION           -> EXPRESSION RELATIONAL_OPERATOR EXPRESSION
 
