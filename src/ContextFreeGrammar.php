@@ -10,58 +10,48 @@ class ContextFreeGrammar
 {
     private $nonTerminals;
     private $terminals;
-    private $rules;
+    private $rulesBySymbol;
     private $startSymbol;
     private $epsilonSymbol;
+    private $productionsCount = 0;
+
+    /**
+     * @var Rule[]
+     */
+    private $ruleByOffset;
 
     public function __construct(string $epsilonSymbol = '__eps__')
     {
         $this->epsilonSymbol = $epsilonSymbol;
     }
 
-    public function addRule($symbol, array $rhs)
+    /**
+     * @return Rule
+     */
+    public function getStartSymbolSingleRule(): Rule
     {
-        if (empty($this->rules)) {
-            $this->startSymbol = $symbol;
+        $rules = $this->getRulesBySymbol($this->getStartSymbol());
+        if (count($rules) != 1) {
+            throw new \RuntimeException("Start symbol does not have just one rule.");
         }
 
-        $this->addNonTerminal($symbol);
-        $this->rules[$symbol][] = $rhs;
+        return reset($rules);
     }
 
-    private function addNonTerminal(string $value)
+    /**
+     * @param string $nonTerminal
+     *
+     * @return array|Rule[]
+     */
+    public function getRulesBySymbol(string $nonTerminal): array
     {
-        if ($this->isTerminal($value)) {
+        if (!$this->isNonTerminal($nonTerminal)) {
             throw new \InvalidArgumentException(
-                "Variable $value was already added as a terminal."
+                "Symbol $nonTerminal is not a non terminal."
             );
         }
 
-        $this->nonTerminals[$value] = true;
-    }
-
-    public function isTerminal(string $value): bool
-    {
-        return isset($this->terminals[$value]);
-    }
-
-    public function extractTerminals()
-    {
-        $this->terminals = [];
-        foreach ($this->rules as $symbol => $symbolRules) {
-            foreach ($symbolRules as $rule) {
-                foreach ($rule as $item) {
-                    // if it isn't a non terminal then its a terminal
-                    if (!$this->isNonTerminal($item)
-                        && !$this->isEpsilon(
-                            $item
-                        )
-                    ) {
-                        $this->addTerminal($item);
-                    }
-                }
-            }
-        }
+        return $this->rulesBySymbol[$nonTerminal];
     }
 
     public function isNonTerminal(string $value): bool
@@ -69,20 +59,17 @@ class ContextFreeGrammar
         return isset($this->nonTerminals[$value]);
     }
 
-    public function isEpsilon(string $symbol): bool
+    /**
+     * @return string
+     */
+    public function getStartSymbol()
     {
-        return $this->epsilonSymbol === $symbol;
+        return $this->startSymbol;
     }
 
-    private function addTerminal(string $value)
+    public function getRuleById(int $id): Rule
     {
-        if ($this->isNonTerminal($value)) {
-            throw new \InvalidArgumentException(
-                "Variable $value was added as a non terminal."
-            );
-        }
-
-        $this->terminals[$value] = true;
+        return $this->ruleByOffset[$id];
     }
 
     public function __toString()
@@ -104,10 +91,11 @@ class ContextFreeGrammar
 
         $indentSize = max(array_map('strlen', $nonTerminals));
         $thePad     = str_pad('', $indentSize);
-        foreach ($this->rules as $symbol => $rules) {
+        foreach ($this->rulesBySymbol as $symbol => $rules) {
             $symbolRules = [];
+            /** @var Rule[] $rules */
             foreach ($rules as $ruleArray) {
-                $symbolRules[] = implode(' ', $ruleArray);
+                $symbolRules[] = implode(' ', $ruleArray->getRhs());
             }
 
             $symbolPadded = str_pad($symbol, $indentSize, ' ');
@@ -132,24 +120,113 @@ $rulesStr
 GRAMMAR;
     }
 
-    public function forEachTerminal(callable $mapper)
+    public function filterNonTerminals(array $symbols): array
     {
-        foreach ($this->rules as $symbol => $rules) {
-            foreach ($rules as $ruleId => $rule) {
-                foreach ($rule as $itemId => $item) {
-                    if (!$this->isNonTerminal($item)
-                        && !$this->isEpsilon(
-                            $item
-                        )
-                    ) {
-                        $this->rules[$symbol][$ruleId][$itemId] = $mapper(
-                            $this->rules[$symbol][$ruleId][$itemId]
-                        );
-                    }
-                }
+        $filtered = [];
+        foreach ($symbols as $symbol) {
+            if (is_scalar($symbol) && isset($this->nonTerminals[$symbol])) {
+                $filtered[] = $symbol;
             }
         }
 
+        return $filtered;
+    }
+
+    public function forEachTerminal(callable $mapper)
+    {
+        foreach ($this->ruleByOffset as $rule) {
+            $rule->mapRhs(
+                function ($item) use ($mapper) {
+                    if ($this->isNonTerminal($item) || $this->isEpsilon($item)) {
+                        return $item;
+                    }
+
+                    return $mapper($item);
+                }
+            );
+        }
+
         $this->extractTerminals();
+    }
+
+    public function isEpsilon(string $symbol): bool
+    {
+        return $this->epsilonSymbol === $symbol;
+    }
+
+    public function extractTerminals()
+    {
+        $this->terminals = [];
+        foreach ($this->ruleByOffset as $rule) {
+            foreach ($rule->getRhs() as $item) {
+                // if it isn't a non terminal then its a terminal
+                if (!$this->isNonTerminal($item) && !$this->isEpsilon($item)) {
+                    $this->addTerminal($item);
+                }
+            }
+        }
+    }
+
+    private function addTerminal(string $value
+    ) {
+        if ($this->isNonTerminal($value)) {
+            throw new \InvalidArgumentException(
+                "Variable $value was added as a non terminal."
+            );
+        }
+
+        $this->terminals[$value] = true;
+    }
+
+    public function enrich(): ContextFreeGrammar
+    {
+        $enriched = clone $this;
+
+        $prevStart             = $enriched->getStartSymbol();
+        $newSymbol             = sprintf('_%s', $prevStart);
+        $enriched->startSymbol = $newSymbol;
+        $enriched->addRule($newSymbol, [$prevStart]);
+        $enriched->extractTerminals();
+
+        return $enriched;
+    }
+
+    public function addRule($symbol, array $rhs)
+    {
+        if (empty($this->rulesBySymbol)) {
+            $this->startSymbol = $symbol;
+        }
+
+        $rule = new Rule($this->productionsCount++, $symbol, $rhs);
+        $this->addNonTerminal($symbol);
+        $this->rulesBySymbol[$symbol][]     = $rule;
+        $this->ruleByOffset[$rule->getId()] = $rule;
+    }
+
+    private function addNonTerminal(string $value)
+    {
+        if ($this->isTerminal($value)) {
+            throw new \InvalidArgumentException(
+                "Variable $value was already added as a terminal."
+            );
+        }
+
+        $this->nonTerminals[$value] = true;
+    }
+
+    public function isTerminal(string $value): bool
+    {
+        return isset($this->terminals[$value]);
+    }
+
+    public function getNonTerminals()
+    {
+        return array_keys($this->nonTerminals);
+    }
+
+
+    public function getTerminals()
+    {
+        return array_keys($this->terminals);
     }
 }

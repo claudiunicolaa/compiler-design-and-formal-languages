@@ -15,7 +15,7 @@ OPT_VAR_DEC_PART    -> VAR_DEC_PART
 CONST_DEF_PART      -> 82 CONST_DEF CONST_DEF_PART
                      | 82 CONST_DEF
 
-CONST_DEF           -> 0 70 0 73
+CONST_DEF           -> 0 70 1 73
 
 VAR_DEC_PART        -> 85 VAR_DEC 73
                      | 85 VAR_DEC 73 VAR_DEC_PART
@@ -84,9 +84,7 @@ RELATIONAL_OPERATOR -> 10
 VARIABLE            -> 0
                      | 0 INDEX_PART
 
-INDEX_PART          -> 37 VARIABLE 40
-                     | 37 VARIABLE 40 INDEX_PART
-                     | 37 EXPRESSION 40
+INDEX_PART          -> 37 EXPRESSION 40
                      | 37 EXPRESSION 40 INDEX_PART
 
 TYPE                -> ARRAY_TYPE

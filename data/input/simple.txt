@@ -1,0 +1,17 @@
+
+
+#a comment before
+
+program simple;
+
+#ignored comment
+
+const CONST_A = "valueofconsta"
+const MAX_B = 10;
+
+declare a as int;
+
+{
+    b = 0;
+}
+

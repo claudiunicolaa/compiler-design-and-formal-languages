@@ -8,6 +8,9 @@ class Scanner
 {
     const CODE_SYMBOL_OR_KEYWORD = -1;
 
+    const IDENTIFIER_PLACEHOLDER = '__IDENTIFIER__';
+    const CONSTANT_PLACEHOLDER   = '__CONSTANT__';
+
     /**
      * @var Lexer
      */
@@ -154,10 +157,18 @@ class Scanner
 
     public function replaceTerminals(ContextFreeGrammar $grammar)
     {
+        $itemMap = array_merge(
+            $this->codifiedTable,
+            [
+                self::IDENTIFIER_PLACEHOLDER => Token::T_IDENTIFIER,
+                self::CONSTANT_PLACEHOLDER   => Token::T_CONSTANT,
+            ]
+        );
+
         $grammar->forEachTerminal(
-            function ($item) {
-                if (isset($this->codifiedTable[$item])) {
-                    return $this->codifiedTable[$item];
+            function ($item) use ($itemMap) {
+                if (isset($itemMap[$item])) {
+                    return $itemMap[$item];
                 }
 
                 return $item;

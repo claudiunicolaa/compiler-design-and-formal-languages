@@ -1,6 +1,6 @@
 PROGRAM_DEF         -> PROG_HEADING BLOCK
 
-PROG_HEADING        -> program IDENTIFIER ;
+PROG_HEADING        -> program __IDENTIFIER__ ;
 
 BLOCK               -> DECL_PART COMPOUND_STMT
 
@@ -15,15 +15,15 @@ OPT_VAR_DEC_PART    -> VAR_DEC_PART
 CONST_DEF_PART      -> const CONST_DEF CONST_DEF_PART
                      | const CONST_DEF
 
-CONST_DEF           -> IDENTIFIER = CONSTANT ;
+CONST_DEF           -> __IDENTIFIER__ = __CONSTANT__ ;
 
 VAR_DEC_PART        -> declare VAR_DEC ;
                      | declare VAR_DEC ; VAR_DEC_PART
 
 VAR_DEC             -> IDENTIFIER_LIST as TYPE
 
-IDENTIFIER_LIST     -> IDENTIFIER
-                     | IDENTIFIER , IDENTIFIER_LIST
+IDENTIFIER_LIST     -> __IDENTIFIER__
+                     | __IDENTIFIER__ , IDENTIFIER_LIST
 
 COMPOUND_STMT       -> { STMT_SEQ }
 
@@ -37,12 +37,12 @@ SIMPLE_STMT         -> ASSIGN_STMT
                      | RETURN_STMT
                      | IO_STMT
 
-ASSIGN_STMT         -> IDENTIFIER = EXPRESSION
+ASSIGN_STMT         -> __IDENTIFIER__ = EXPRESSION
 
 RETURN_STMT         -> return EXPRESSION
 
-IO_STMT             -> read ( IDENTIFIER )
-                     | write ( IDENTIFIER )
+IO_STMT             -> read ( __IDENTIFIER__ )
+                     | write ( __IDENTIFIER__ )
 
 STRUCTURED_STMT     -> IF_STMT
                      | COMPOUND_STMT
@@ -70,8 +70,8 @@ OPERATOR            -> +
                      | %
                      | &&
 
-TERM                -> IDENTIFIER
-                     | LITERAL_NUMBER
+TERM                -> __IDENTIFIER__
+                     | __CONSTANT__
                      | ( EXPRESSION )
 
 RELATIONAL_OPERATOR -> ==
@@ -81,15 +81,11 @@ RELATIONAL_OPERATOR -> ==
                      | >
                      | >=
 
-VARIABLE            -> IDENTIFIER
-                     | INDEXED_VARIABLE
+VARIABLE            -> __IDENTIFIER__
+                     | __IDENTIFIER__ INDEX_PART
 
-INDEXED_VARIABLE    -> IDENTIFIER INDEX_PART
-
-INDEX_PART          -> [ VARIABLE ]
-                     | [ VARIABLE ] INDEX_PART
-                     | [ LITERAL_NUMBER ]
-                     | [ LITERAL_NUMBER ] INDEX_PART
+INDEX_PART          -> [ EXPRESSION ]
+                     | [ EXPRESSION ] INDEX_PART
 
 TYPE                -> ARRAY_TYPE
                      | SCALAR_TYPE
@@ -97,4 +93,4 @@ TYPE                -> ARRAY_TYPE
 SCALAR_TYPE         -> int
                      | char
 
-ARRAY_TYPE          -> SCALAR_TYPE [ LITERAL_NUMBER ]
+ARRAY_TYPE          -> SCALAR_TYPE [ __CONSTANT__ ]

@@ -103,15 +103,15 @@ class Token
         return $this->type;
     }
 
+    public function getPosition(): Position
+    {
+        return $this->position;
+    }
+
     public function setPosition(Position $position): Token
     {
         $this->position = $position;
 
         return $this;
-}
-
-    public function getPosition(): Position
-    {
-        return $this->position;
     }
 }
