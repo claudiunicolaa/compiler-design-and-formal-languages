@@ -78,6 +78,10 @@ class AnalysisContext
     {
         $action = $this->analysisTable->getAction($this->currentState);
         if ($action instanceof ShiftAction) {
+            if (!isset($this->input[$this->position])) {
+                throw new \RuntimeException('Input finished without being valid.');
+            }
+
             $currentSymbol = $this->input[$this->position];
             $this->stack->push($currentSymbol);
             $this->currentState = $this->analysisTable->getGoto(

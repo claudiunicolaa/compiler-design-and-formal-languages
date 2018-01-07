@@ -44,7 +44,7 @@ $grammar = $loader->loadFromString(
 S -> A
 A -> a A
 A -> b A
-A -> __eps__
+A -> c
 GR
 );
 
